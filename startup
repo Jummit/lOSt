@@ -1,6 +1,9 @@
 local processAPI = require "apis.processes"
+local autostart = require "programs.autostart.autostart"
 
 local processes = {}
+
+autostart.start()
 
 while true do
   -- update
