@@ -1,14 +1,12 @@
 -- intended global, so every program can modify the processes
 processes = require "apis.processes"
-local autostart = require "programs.autostart.autostart"
+local autostart = require "programs.autostart"
 
-autostart.start()
+autostart()
 
 while true do
   -- update
   local event, var1, var2, var3 = os.pullEventRaw()
-  processAPI.update(processes, event, var1, var2, var3)
+  processes:update(processes, event, var1, var2, var3)
 
-  -- draw
-  processAPI.draw(processes)
 end
