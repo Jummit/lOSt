@@ -1,7 +1,6 @@
-local processAPI = require "apis.processes"
+-- intended global, so every program can modify the processes
+processes = require "apis.processes"
 local autostart = require "programs.autostart.autostart"
-
-local processes = {}
 
 autostart.start()
 
