@@ -41,8 +41,9 @@ return {
     if fs.exists(programPath.."properties.lua") then
       local programProperties = dofile(programPath.."properties.lua")
     end
-    
-    self:new(function() dofile(programPath.."init.lua") end, programProperties)
+
+    local program = loadfile(programPath.."init.lua", _ENV)
+    self:new(program, programProperties)
   end,
   new = function(self, func, properties)
     local process = {
