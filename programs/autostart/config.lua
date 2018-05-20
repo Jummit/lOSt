@@ -1,3 +1,3 @@
 return {
-  "/programs/menu/init.lua"
+  "menu"
 }
