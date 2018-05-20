@@ -2,9 +2,9 @@ local userEvents = {"mouse_click", "mouse_up", "mouse_drag", "char", "key", "mon
 local parentTerm = term.current()
 local parentWidth, parentHeight = parentTerm.getSize()
 local defaultProperties = {
-  x = parentWidth/2-parentWidth/4,
-  y = parentHeight/2-parentHeight/4,
-  w = parentWidth/4, h = parentWidth/4,
+  x = math.ceil(parentWidth/2-parentWidth/4),
+  y = math.ceil(parentHeight/2-parentHeight/4),
+  w = math.ceil(parentWidth/2), h = math.ceil(parentHeight/2),
   noWindow = false, noBar = false, noInteraction = false
 }
 
@@ -18,10 +18,24 @@ local isUserEvent = function(event)
 end
 
 return {
-  updateProcess = function(self, process)
+  updateProcess = function(self, process, event, var1, var2, var3)
     local oldTerm = term.redirect(process.term)
-    coroutine.resume(process.coroutine)
+    term.setBackgroundColor(colors.lightGray)
+    term.clear()
+    local succ, mess = pcall(function()
+      coroutine.resume(process.coroutine, event, var1, var2, var3)
+    end)
+    if not succ and mess then
+      term.setBackgroundColor(colors.black)
+      term.setTextColor(colors.orange)
+      term.clear()
+      term.setCursorPos(1, 1)
+      print("The program crashed!")
+      write(mess)
+    end
     term.redirect(oldTerm)
+    process.term.redraw()
+    --error("test")
   end,
   start = function(self, programName, event, var1, var2, var3)
     local programPath = "/programs/"..programName.."/"
