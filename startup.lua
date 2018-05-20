@@ -1,6 +1,6 @@
 -- intended global, so every program can modify the processes
 processes = require "apis.processes"
-processes:start("init")
+processes:start("autostart")
 
 while true do
   -- update
