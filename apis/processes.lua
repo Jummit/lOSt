@@ -25,20 +25,11 @@ return {
       table.remove(self, processNum)
     end
 
+    -- redirect to process window and update it
     local oldTerm = term.redirect(process.term)
-    term.setBackgroundColor(colors.gray)
-    term.clear()
-    local succ, mess = pcall(function()
-      coroutine.resume(process.coroutine, event, var1, var2, var3)
-    end)
-    if not succ and mess then
-      term.setBackgroundColor(colors.black)
-      term.setTextColor(colors.orange)
-      term.clear()
-      term.setCursorPos(1, 1)
-      print("The program crashed!")
-      write(mess)
-    end
+    coroutine.resume(process.coroutine)
+
+    -- redirect to the old term and redraw the process window
     term.redirect(oldTerm)
     process.term.redraw()
   end,
@@ -55,7 +46,20 @@ return {
   end,
   new = function(self, func, properties)
     local process = {
-      coroutine = coroutine.create(func),
+      coroutine = coroutine.create(function()
+        local succ, mess = pcall(func)
+        if not succ and mess then
+          while true do
+            term.setBackgroundColor(colors.black)
+            term.setTextColor(colors.orange)
+            term.clear()
+            term.setCursorPos(1, 1)
+            print("The program crashed!")
+            write(mess)
+            coroutine.yield()
+          end
+        end
+      end),
       reposition = function(self, x, y)
         self.x, self.y = x, y
         self.term.reposition(x, y)
