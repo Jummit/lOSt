@@ -18,9 +18,15 @@ local isUserEvent = function(event)
 end
 
 return {
-  updateProcess = function(self, process, event, var1, var2, var3)
+  updateProcess = function(self, processNum, event, var1, var2, var3)
+    local process = self[processNum]
+    -- check if process is still running, if not, remove it
+    if coroutine.status(process.coroutine) == "dead" then
+      table.remove(self, processNum)
+    end
+
     local oldTerm = term.redirect(process.term)
-    term.setBackgroundColor(colors.lightGray)
+    term.setBackgroundColor(colors.gray)
     term.clear()
     local succ, mess = pcall(function()
       coroutine.resume(process.coroutine, event, var1, var2, var3)
@@ -35,7 +41,6 @@ return {
     end
     term.redirect(oldTerm)
     process.term.redraw()
-    --error("test")
   end,
   start = function(self, programName, event, var1, var2, var3)
     local programPath = "/programs/"..programName.."/"
@@ -78,7 +83,7 @@ return {
 
     -- update every program
     for processNum, process in ipairs(self) do
-      self:updateProcess(process)
+      self:updateProcess(processNum)
     end
   end
 }
