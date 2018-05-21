@@ -1,3 +1,1 @@
-while true do
-  coroutine.yield()
-end
+processes:run("worm")
