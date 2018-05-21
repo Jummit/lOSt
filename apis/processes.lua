@@ -167,7 +167,7 @@ return {
         self.term.reposition(x, y)
       end,
       resize = function(self, w, h)
-        if w>4 and h>3 then
+        if w>#self.name and h>3 then
           local oldX, oldY = self.term.getPosition()
           self.term.reposition(oldX, oldY, w, h)
           os.queueEvent("term_resize")
