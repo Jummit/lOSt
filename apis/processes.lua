@@ -55,19 +55,28 @@ return {
   end,
   handleInputOfProcess = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
+    local px, py = process.term.getPosition()
+    local pw, ph = process.term.getSize()
+    local mx, my
+    if var3 then
+      mx, my = var2-px+1, var3-py+1
+    end
 
     if event == "mouse_click" then
-      local px, py = process.term.getPosition()
-      local pw, ph = process.term.getSize()
-      local mx, my = var2-px+1, var3-py+1
-
       if mx>0 and my==0 and mx<pw+1 then
         if mx == pw then
           table.remove(self, processNum)
         else
+          process.clickedX, process.clickedY = mx, my
           process.barClicked = true
         end
+      else
+        process.barClicked = false
       end
+    elseif event == "mouse_drag" and process.barClicked then
+      process:reposition(process.x-(process.clickedX-mx), process.y-(process.clickedY-my))
+    elseif event == "mouse_up" then
+      process.barClicked = false
     end
   end,
   updateProgramOfProcess = function(self, processNum, event, var1, var2, var3)
