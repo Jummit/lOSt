@@ -10,8 +10,7 @@ local programs = {
   {
     exec = "edit text",
     icon = {"ed", "44", "ff"}
-  },
-
+  }
 }
 
 return {
