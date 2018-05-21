@@ -45,6 +45,13 @@ return {
     term.setCursorPos(process.x+process.w-1, process.y-1)
     term.setTextColor(colors.gray)
     term.write("x")
+
+    if process.barClicked then
+      term.setCursorPos(process.x, process.y-1)
+      for i = 1, process.w-1 do
+        term.write("_")
+      end
+    end
   end,
   handleInputOfProcess = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
@@ -54,9 +61,12 @@ return {
       local pw, ph = process.term.getSize()
       local mx, my = var2-px+1, var3-py+1
 
-
-      if mx == pw and my == 0 then
-        table.remove(self, processNum)
+      if mx>0 and my==0 and mx<pw+1 then
+        if mx == pw then
+          table.remove(self, processNum)
+        else
+          process.barClicked = true
+        end
       end
     end
   end,
@@ -80,9 +90,11 @@ return {
       return
     end
 
-    self:drawWindowDecorations(processNum, event, var1, var2, var3)
-    self:updateProgramOfProcess(processNum, event, var1, var2, var3)
     self:handleInputOfProcess(processNum, event, var1, var2, var3)
+    if self[processNum] then
+      self:drawWindowDecorations(processNum, event, var1, var2, var3)
+      self:updateProgramOfProcess(processNum, event, var1, var2, var3)
+    end
   end,
   start = function(self, programName, event, var1, var2, var3)
     local programPath = "/programs/"..programName.."/"
