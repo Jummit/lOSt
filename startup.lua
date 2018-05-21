@@ -10,7 +10,7 @@ while true do
   os.cancelTimer(timer)
 
   if var1 ~= timer then
-    processes:update(processes, event, var1, var2, var3)
+    processes:update(event, var1, var2, var3)
   end
 end
 end)

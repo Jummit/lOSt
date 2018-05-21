@@ -35,12 +35,33 @@ local createProcessCoroutine = function(func)
 end
 
 return {
-  updateProcess = function(self, processNum, event, var1, var2, var3)
+  getEventsForProcess = function(processNum, event, var1, var2, var3)
+
+  end,
+  drawWindowDecorations = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
-    -- check if process is still running, if not, remove it
-    if coroutine.status(process.coroutine) == "dead" then
-      table.remove(self, processNum)
+
+    paintutils.drawLine(process.x, process.y-1, process.x+process.w-1, process.y-1, colors.lightGray)
+    term.setCursorPos(process.x+process.w-1, process.y-1)
+    term.setTextColor(colors.gray)
+    term.write("x")
+  end,
+  handleInputOfProcess = function(self, processNum, event, var1, var2, var3)
+    local process = self[processNum]
+
+    if event == "mouse_click" then
+      local px, py = process.term.getPosition()
+      local pw, ph = process.term.getSize()
+      local mx, my = var2-px+1, var3-py+1
+
+
+      if mx == pw and my == 0 then
+        table.remove(self, processNum)
+      end
     end
+  end,
+  updateProgramOfProcess = function(self, processNum, event, var1, var2, var3)
+    local process = self[processNum]
 
     -- redirect to process window and update it
     local oldTerm = term.redirect(process.term)
@@ -49,6 +70,19 @@ return {
     -- redirect to the old term and redraw the process window
     term.redirect(oldTerm)
     process.term.redraw()
+  end,
+  updateProcess = function(self, processNum, event, var1, var2, var3)
+    local process = self[processNum]
+
+    -- check if process is still running, if not, remove it
+    if coroutine.status(process.coroutine) == "dead" then
+      table.remove(self, processNum)
+      return
+    end
+
+    self:drawWindowDecorations(processNum, event, var1, var2, var3)
+    self:updateProgramOfProcess(processNum, event, var1, var2, var3)
+    self:handleInputOfProcess(processNum, event, var1, var2, var3)
   end,
   start = function(self, programName, event, var1, var2, var3)
     local programPath = "/programs/"..programName.."/"
@@ -87,12 +121,8 @@ return {
     table.insert(self, process)
   end,
   update = function(self, event, var1, var2, var3)
-    -- check if event is made from the user
-    local userEvent = isUserEvent(event)
-
-    -- update every program
     for processNum, process in ipairs(self) do
-      self:updateProcess(processNum)
+      self:updateProcess(processNum, event, var1, var2, var3)
     end
   end
 }
