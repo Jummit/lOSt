@@ -18,11 +18,27 @@ local programs = {
   {
     exec = "redirection",
     icon = {"\136\133", "b8", "77"}
+  },
+  {
+    exec = "adventure",
+    icon = {"?_", "40", "ff"}
+  },
+  {
+    exec = "lua",
+    icon = {"lu", "00", "ff"}
+  },
+  {
+    exec = "chat join lost_chat "..os.getComputerID(),
+    icon = {"\2\19", "00", "ff"}
+  },
+  {
+    exec = "chat host lost_chat",
+    icon = {"\16\19", "00", "ff"}
   }
 }
 
 return {
-  w = 17,
+  w = #programs*3,
   update = function(event, var1, var2, var3)
     for programNum, program in ipairs(programs) do
 
