@@ -10,11 +10,15 @@ local programs = {
   {
     exec = "edit text",
     icon = {"ed", "44", "ff"}
+  },
+  {
+    exec = "shell",
+    icon = {">_", "40", "ff"}
   }
 }
 
 return {
-  w = 10,
+  w = 15,
   update = function(event, var1, var2, var3)
     for programNum, program in ipairs(programs) do
 
