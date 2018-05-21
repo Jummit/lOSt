@@ -1,3 +1,5 @@
+local buffer = window.create(term.current(), 1, 1, term.getSize())
+local oldTerm = term.redirect(buffer)
 local succ, mess = pcall(function()
 -- intended global, so every program can modify the processes
 processes = require "apis.processes"
@@ -9,9 +11,9 @@ while true do
   local event, var1, var2, var3 = os.pullEventRaw()
   os.cancelTimer(timer)
 
-  --if var1 ~= timer then
-    processes:update(event, var1, var2, var3)
-  --end
+  buffer.setVisible(false)
+  processes:update(event, var1, var2, var3)
+  buffer.setVisible(true)
 end
 end)
 

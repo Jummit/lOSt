@@ -7,6 +7,6 @@ while true do
   elseif event == "key" then
     keyboard[keys.getName(key)] = true
   elseif event == "key_up" then
-    keyboard[key] = false
+    keyboard[keys.getName(key)] = false
   end
 end

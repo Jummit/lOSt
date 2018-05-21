@@ -107,7 +107,9 @@ return {
 
     -- redirect to process window and update it
     local oldTerm = term.redirect(process.term)
+    process.term.setVisible(false)
     coroutine.resume(process.coroutine, event, var1, var2, var3 )
+    process.term.setVisible(true)
 
     -- redirect to the old term and redraw the process window
     term.redirect(oldTerm)
