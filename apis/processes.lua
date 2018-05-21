@@ -5,7 +5,8 @@ local defaultProperties = {
   x = math.ceil(parentWidth/2-parentWidth/4),
   y = math.ceil(parentHeight/2-parentHeight/4),
   w = math.ceil(parentWidth/2), h = math.ceil(parentHeight/2),
-  noWindow = false, noBar = false, noInteraction = false
+  noWindow = false, noBar = false, noInteraction = false,
+  name = "Unnamed Window"
 }
 
 local isUserEvent = function(event)
@@ -42,16 +43,12 @@ return {
     local process = self[processNum]
 
     paintutils.drawLine(process.x, process.y-1, process.x+process.w-1, process.y-1, colors.lightGray)
-    term.setCursorPos(process.x+process.w-1, process.y-1)
     term.setTextColor(colors.gray)
-    term.write("x")
 
-    if process.barClicked then
-      term.setCursorPos(process.x, process.y-1)
-      for i = 1, process.w-1 do
-        term.write("_")
-      end
-    end
+    term.setCursorPos(process.x+process.w-1, process.y-1)
+    term.write("x")
+    term.setCursorPos(process.x, process.y-1)
+    term.write(process.name)
   end,
   handleInputOfProcess = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
@@ -84,7 +81,7 @@ return {
 
     -- redirect to process window and update it
     local oldTerm = term.redirect(process.term)
-    coroutine.resume(process.coroutine)
+    coroutine.resume(process.coroutine, event, var1, var2, var3)
 
     -- redirect to the old term and redraw the process window
     term.redirect(oldTerm)
@@ -105,7 +102,10 @@ return {
       self:updateProgramOfProcess(processNum, event, var1, var2, var3)
     end
   end,
-  start = function(self, programName, event, var1, var2, var3)
+  run = function(self, command)
+    self:new(function() shell.run(command) end, {name = command})
+  end,
+  start = function(self, programName)
     local programPath = "/programs/"..programName.."/"
     local width, height = term.getSize()
     local programProperties = {}
@@ -125,7 +125,7 @@ return {
         self.term.reposition(x, y)
       end,
       resize = function(self, w, h)
-        oldX, oldY = self.term.getPosition()
+        local oldX, oldY = self.term.getPosition()
         self.term.reposition(oldX, oldY, w, h)
         os.queueEvent("term_resize")
       end
