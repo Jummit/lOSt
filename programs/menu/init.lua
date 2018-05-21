@@ -12,7 +12,7 @@ for _, itemName in ipairs(itemNames) do
     update = function(self, event, var1, var2, var3)
       local oldTerm = term.redirect(self.term)
 
-      term.setBackgroundColor(colors.gray)
+      term.setBackgroundColor(colors.lightGray)
       term.setTextColor(colors.black)
       term.clear()
       term.setCursorPos(1, 1)
@@ -29,7 +29,7 @@ while true do
   local event, var1, var2, var3 = os.pullEvent()
 
 
-  term.setBackgroundColor(colors.gray)
+  term.setBackgroundColor(colors.lightGray)
   term.clear()
   term.setCursorPos(1, 1)
   for _, item in ipairs(items) do

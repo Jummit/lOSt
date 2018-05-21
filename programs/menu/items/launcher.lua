@@ -14,11 +14,15 @@ local programs = {
   {
     exec = "shell",
     icon = {">_", "40", "ff"}
+  },
+  {
+    exec = "redirection",
+    icon = {"\136\133", "b8", "77"}
   }
 }
 
 return {
-  w = 15,
+  w = 17,
   update = function(event, var1, var2, var3)
     for programNum, program in ipairs(programs) do
 
