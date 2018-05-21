@@ -17,6 +17,23 @@ local isUserEvent = function(event)
   end
 end
 
+local createProcessCoroutine = function(func)
+  return coroutine.create(function()
+    local succ, mess = pcall(func)
+    if not succ and mess then
+      while true do
+        term.setBackgroundColor(colors.black)
+        term.setTextColor(colors.orange)
+        term.clear()
+        term.setCursorPos(1, 1)
+        print("The program crashed!")
+        write(mess)
+        coroutine.yield()
+      end
+    end
+  end)
+end
+
 return {
   updateProcess = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
@@ -39,7 +56,7 @@ return {
     local programProperties = {}
 
     if fs.exists(programPath.."properties.lua") then
-      local programProperties = dofile(programPath.."properties.lua")
+      programProperties = dofile(programPath.."properties.lua")
     end
 
     local program = loadfile(programPath.."init.lua", _ENV)
@@ -47,20 +64,7 @@ return {
   end,
   new = function(self, func, properties)
     local process = {
-      coroutine = coroutine.create(function()
-        local succ, mess = pcall(func)
-        if not succ and mess then
-          while true do
-            term.setBackgroundColor(colors.black)
-            term.setTextColor(colors.orange)
-            term.clear()
-            term.setCursorPos(1, 1)
-            print("The program crashed!")
-            write(mess)
-            coroutine.yield()
-          end
-        end
-      end),
+      coroutine = createProcessCoroutine(func),
       reposition = function(self, x, y)
         self.x, self.y = x, y
         self.term.reposition(x, y)
