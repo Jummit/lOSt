@@ -78,10 +78,19 @@ return {
   end,
   updateProgramOfProcess = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
+    local pw, ph = process.term.getSize()
+    local px, py = process.term.getPosition()
+    local var1, var2, var3 = var1, var2, var3
+
+
+    if string.sub(event, 1, #"mouse") == "mouse" then
+      var2 = var2-px+1
+      var3 = var3-py+1
+    end
 
     -- redirect to process window and update it
     local oldTerm = term.redirect(process.term)
-    coroutine.resume(process.coroutine, event, var1, var2, var3)
+    coroutine.resume(process.coroutine, event, var1, var2, var3 )
 
     -- redirect to the old term and redraw the process window
     term.redirect(oldTerm)
@@ -102,9 +111,11 @@ return {
       self:updateProgramOfProcess(processNum, event, var1, var2, var3)
     end
   end,
+  -- start process with command as function
   run = function(self, command)
     self:new(function() shell.run(command) end, {name = command})
   end,
+  -- start process from directory
   start = function(self, programName)
     local programPath = "/programs/"..programName.."/"
     local width, height = term.getSize()
@@ -117,6 +128,7 @@ return {
     local program = loadfile(programPath.."init.lua", _ENV)
     self:new(program, programProperties)
   end,
+  -- start a new process
   new = function(self, func, properties)
     local process = {
       coroutine = createProcessCoroutine(func),
@@ -141,6 +153,7 @@ return {
 
     table.insert(self, process)
   end,
+  -- update all processes
   update = function(self, event, var1, var2, var3)
     for processNum, process in ipairs(self) do
       self:updateProcess(processNum, event, var1, var2, var3)
