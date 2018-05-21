@@ -38,59 +38,69 @@ end
 return {
   drawWindowDecorations = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
-    local pw, ph = process.term.getSize()
+    if not process.noWindow and not process.noBar then
+      local pw, ph = process.term.getSize()
 
-    paintutils.drawLine(process.x, process.y-1, process.x+pw-1, process.y-1, colors.lightGray)
-    term.setTextColor(colors.gray)
+      paintutils.drawLine(process.x, process.y-1, process.x+pw-1, process.y-1, colors.lightGray)
+      term.setTextColor(colors.gray)
 
-    term.setCursorPos(process.x+pw-1, process.y-1)
-    term.write("x")
-    term.setCursorPos(process.x, process.y-1)
-    term.write(process.name)
+      term.setCursorPos(process.x+pw-1, process.y-1)
+      term.write("x")
+      term.setCursorPos(process.x, process.y-1)
+      term.write(process.name)
+    end
   end,
   handleInputOfProcess = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
-    local px, py = process.term.getPosition()
-    local pw, ph = process.term.getSize()
-    local mx, my
-    if var3 then
-      mx, my = var2-px+1, var3-py+1
-    end
+    if not process.noWindow and not process.noInteraction then
+      local px, py = process.term.getPosition()
+      local pw, ph = process.term.getSize()
+      local mx, my
+      if var3 then
+        mx, my = var2-px+1, var3-py+1
+      end
 
-    if event == "mouse_click" then
-      process.resizeX, process.resizeY = nil, nil
-      if mx>0 and my==0 and mx<pw+1 then
-        if mx == pw then
-          table.remove(self, processNum)
+      if event == "mouse_click" then
+        process.resizeX, process.resizeY = nil, nil
+        if mx>0 and my==0 and mx<pw+1 then
+          if not process.noBar then
+            if mx == pw then
+              table.remove(self, processNum)
+            else
+              process.clickedX, process.clickedY = mx, my
+              process.barClicked = true
+            end
+          end
         else
-          process.clickedX, process.clickedY = mx, my
-          process.barClicked = true
+          process.barClicked = false
+          if keyboard.leftCtrl and mx>0 and my>0 and mx<pw+1 and my<ph+1 then
+            if mx==1 or mx==pw then
+              process.resizeX = mx
+            end
+            if my==1 or my==ph then
+              process.resizeY = my
+            end
+          end
         end
-      else
-        process.barClicked = false
-        if keyboard.leftCtrl and mx>0 and my>0 and mx<pw+1 and my<ph+1 then
-          if mx==1 or mx==pw then
+      elseif event == "mouse_drag" and (process.resizeX or process.resizeY) then
+        if not process.noResize then
+          if process.resizeX then
+            process:resize(pw - (process.resizeX-mx), ph)
             process.resizeX = mx
           end
-          if my==1 or my==ph then
+          local pw, ph = process.term.getSize()
+          if process.resizeY then
+            process:resize(pw, ph - (process.resizeY-my))
             process.resizeY = my
           end
         end
+      elseif event == "mouse_drag" and process.barClicked then
+        if not process.noMove then
+          process:reposition(process.x-(process.clickedX-mx), process.y-(process.clickedY-my))
+        end
+      elseif event == "mouse_up" then
+        process.barClicked = false
       end
-    elseif event == "mouse_drag" and (process.resizeX or process.resizeY) then
-      if process.resizeX then
-        process:resize(pw - (process.resizeX-mx), ph)
-        process.resizeX = mx
-      end
-      local pw, ph = process.term.getSize()
-      if process.resizeY then
-        process:resize(pw, ph - (process.resizeY-my))
-        process.resizeY = my
-      end
-    elseif event == "mouse_drag" and process.barClicked then
-      process:reposition(process.x-(process.clickedX-mx), process.y-(process.clickedY-my))
-    elseif event == "mouse_up" then
-      process.barClicked = false
     end
   end,
   updateProgramOfProcess = function(self, processNum, event, var1, var2, var3)
@@ -98,7 +108,6 @@ return {
     local pw, ph = process.term.getSize()
     local px, py = process.term.getPosition()
     local var1, var2, var3 = var1, var2, var3
-
 
     if string.sub(event, 1, #"mouse") == "mouse" then
       var2 = var2-px+1
@@ -109,7 +118,9 @@ return {
     local oldTerm = term.redirect(process.term)
     process.term.setVisible(false)
     coroutine.resume(process.coroutine, event, var1, var2, var3 )
-    process.term.setVisible(true)
+    if not process.noWindow then
+      process.term.setVisible(true)
+    end
 
     -- redirect to the old term and redraw the process window
     term.redirect(oldTerm)
