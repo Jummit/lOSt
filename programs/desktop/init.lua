@@ -1,5 +1,5 @@
 while true do
-  term.setBackgroundColor(colors.gray)
+  term.setBackgroundColor(colors.white)
   term.clear()
   coroutine.yield()
 end
