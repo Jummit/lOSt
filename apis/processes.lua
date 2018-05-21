@@ -36,16 +36,14 @@ local createProcessCoroutine = function(func)
 end
 
 return {
-  getEventsForProcess = function(processNum, event, var1, var2, var3)
-
-  end,
   drawWindowDecorations = function(self, processNum, event, var1, var2, var3)
     local process = self[processNum]
+    local pw, ph = process.term.getSize()
 
-    paintutils.drawLine(process.x, process.y-1, process.x+process.w-1, process.y-1, colors.lightGray)
+    paintutils.drawLine(process.x, process.y-1, process.x+pw-1, process.y-1, colors.lightGray)
     term.setTextColor(colors.gray)
 
-    term.setCursorPos(process.x+process.w-1, process.y-1)
+    term.setCursorPos(process.x+pw-1, process.y-1)
     term.write("x")
     term.setCursorPos(process.x, process.y-1)
     term.write(process.name)
@@ -60,6 +58,7 @@ return {
     end
 
     if event == "mouse_click" then
+      process.resizeX, process.resizeY = nil, nil
       if mx>0 and my==0 and mx<pw+1 then
         if mx == pw then
           table.remove(self, processNum)
@@ -69,6 +68,24 @@ return {
         end
       else
         process.barClicked = false
+        if keyboard.leftCtrl and mx>0 and my>0 and mx<pw+1 and my<ph+1 then
+          if mx==1 or mx==pw then
+            process.resizeX = mx
+          end
+          if my==1 or my==ph then
+            process.resizeY = my
+          end
+        end
+      end
+    elseif event == "mouse_drag" and (process.resizeX or process.resizeY) then
+      if process.resizeX then
+        process:resize(pw - (process.resizeX-mx), ph)
+        process.resizeX = mx
+      end
+      local pw, ph = process.term.getSize()
+      if process.resizeY then
+        process:resize(pw, ph - (process.resizeY-my))
+        process.resizeY = my
       end
     elseif event == "mouse_drag" and process.barClicked then
       process:reposition(process.x-(process.clickedX-mx), process.y-(process.clickedY-my))
