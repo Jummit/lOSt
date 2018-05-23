@@ -2,6 +2,5 @@
 return {
   "desktop",
   "menu",
-  "test",
   "keyhandler"
 }
